@@ -405,6 +405,9 @@ public class QuartzSchedulerTest {
     // Mock Scheduler and related objects
     Scheduler mockScheduler = mock( Scheduler.class );
     Trigger mockTrigger = mock( Trigger.class );
+    
+    when( mockTrigger.getTriggerBuilder() ).thenAnswer( unused -> TriggerBuilder.newTrigger() );
+    when( mockTrigger.getNextFireTime() ).thenReturn( new Date());
 
     when( mockScheduler.getJobDetail( jobKey ) ).thenReturn( mockJobDetail );
     when( mockScheduler.getTriggersOfJob( jobKey ) )
@@ -423,9 +426,9 @@ public class QuartzSchedulerTest {
     quartzScheduler.triggerNow( "testJob\ttestGroup\trandomUuid" );
 
     // Assert
-    assertNotNull( jobDataMap.get( QuartzScheduler.PREVIOUS_TRIGGER_NOW_KEY ) );
-    verify( mockScheduler ).scheduleJob( any( JobDetail.class ), eq( mockTrigger ) );
+    assertNotNull( jobDataMap.get( QuartzScheduler.RESERVEDMAPKEY_PREVIOUS_TRIGGER_NOW ) );
     verify( mockScheduler ).deleteJob( jobKey );
+    verify( mockScheduler ).scheduleJob( any( JobDetail.class ), any( Trigger.class ) );
     verify( mockScheduler ).triggerJob( jobKey );
   }
 
@@ -439,7 +442,7 @@ public class QuartzSchedulerTest {
     JobDetail mockJobDetail = mock( JobDetail.class );
     JobKey jobKey = new JobKey( "testJob\ttestGroup\trandomUuid", "testJob" );
     JobDataMap jobDataMap = new JobDataMap();
-    jobDataMap.put( QuartzScheduler.PREVIOUS_TRIGGER_NOW_KEY, previousTriggerNow );
+    jobDataMap.put( QuartzScheduler.RESERVEDMAPKEY_PREVIOUS_TRIGGER_NOW, previousTriggerNow );
 
     when( mockJobDetail.getKey() ).thenReturn( jobKey );
     when( mockJobDetail.getJobDataMap() ).thenReturn( jobDataMap );
@@ -550,7 +553,7 @@ public class QuartzSchedulerTest {
     JobDetail mockJobDetail = mock( JobDetail.class );
     JobKey jobKey = new JobKey( "testJob\ttestGroup\trandomUuid", "testJob" );
     JobDataMap jobDataMap = new JobDataMap();
-    jobDataMap.put( QuartzScheduler.PREVIOUS_TRIGGER_NOW_KEY, previousTriggerNow );
+    jobDataMap.put( QuartzScheduler.RESERVEDMAPKEY_PREVIOUS_TRIGGER_NOW, previousTriggerNow );
 
     when( mockJobDetail.getKey() ).thenReturn( jobKey );
     when( mockJobDetail.getJobDataMap() ).thenReturn( jobDataMap );
